@@ -1,0 +1,12 @@
+
+var choose_subject_first = "Please choose a subject first.";
+
+var ask_to_remove_pack = "<p>Do you want to remove the icon pack from favorites?</p>";
+
+var userset_removed = "Your userset has been removed.";
+
+var userset_updated = "Your userset has been updated.";
+
+var pack_removed_from_fav = "Icon pack has been removed from favorites.";
+
+var login_required = "Login required";

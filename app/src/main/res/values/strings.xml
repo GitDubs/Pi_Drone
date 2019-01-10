@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MaybeDrone</string>
+    <string name="ESC1">ESC1</string>
+    <string name="ESC2">ESC2</string>
+    <string name="ESC3">ESC3</string>
+    <string name="ESC4">ESC4</string>
+</resources>

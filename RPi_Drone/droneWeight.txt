@@ -1,0 +1,14 @@
+alumninum body          :207 grams
+lithium ion battery     :172 grams
+motor and 10" prop      :44 grams * 4 = 176
+ESC                     :10 grams * 4 = 40
+anker battery           :221 grams
+raspberry pi            :75 grams
+
+Total:891 grams
+
+Cutting Weight
+	1) Remove material/thin down the drone arms
+	2) Find a smaller battery to power the rPi
+	3) Cut off the square edges of the aluminum 
+	   body with the plasma cutter
