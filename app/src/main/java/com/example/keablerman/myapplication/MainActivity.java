@@ -46,8 +46,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void searchPairedDevices(){
+        final String TAG = "searchPairedDevices()";
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        if (pairedDevices.size() > 0) {
+        if (!pairedDevices.isEmpty()) {
             // There are paired devices. Get the name and address of each paired device.
             for (BluetoothDevice device : pairedDevices) {
                 if(device.getName().equals("raspberrypi")) {
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     clientThread.start();
                 }
             }
+        }else{
+            Log.e(TAG, "Found no paired devices");
         }
     }
 

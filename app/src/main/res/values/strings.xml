@@ -1,4 +1,5 @@
 <resources>
+    <string name="connect_btn">Connect</string>
     <string name="app_name">MaybeDrone</string>
     <string name="ESC1">ESC1</string>
     <string name="ESC2">ESC2</string>
