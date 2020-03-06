@@ -8,17 +8,21 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Button;
-import android.widget.SeekBar;
-
 import java.nio.ByteBuffer;
 
 public class FlightDeck extends MainActivity{
+    private MyOnTouchListener pitchRollListener, throttleYawListener;
     private static final String TAG = "FlightView";
     private static final float DISTANCE = 200;
-    private static float throttle = 1500;
-    private static float yaw = 1500;
-    private static float pitch = 1500;
-    private static float roll = 1500;
+    private static final float THROTTLEMAX = 2106;
+    private static final float THROTTLEMIN = 1001;
+    private static final float YAWMAX = 2017;
+    private static final float YAWMIN = 993;
+    private static final float PITCHMAX = 1943;
+    private static final float PITCHMIN = 992;
+    private static final float ROLLMAX = 2030;
+    private static final float ROLLMIN = 1031;
+    private static float throttle, yaw, pitch, roll;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,11 +32,19 @@ public class FlightDeck extends MainActivity{
         ImageView pitch_roll = (ImageView)findViewById(R.id.pitch_roll);
         ImageView throttle_yaw = (ImageView)findViewById(R.id.throttle_yaw);
         Button kill = (Button)findViewById(R.id.kill);
-        pitch_roll.setOnTouchListener(new MyOnTouchListener(false));
-        throttle_yaw.setOnTouchListener(new MyOnTouchListener(true));
+        pitchRollListener = new MyOnTouchListener(false);
+        throttleYawListener = new MyOnTouchListener(true);
+        pitch_roll.setOnTouchListener(pitchRollListener);
+        throttle_yaw.setOnTouchListener(throttleYawListener);
+
+        throttle = THROTTLEMIN;                                                                     //Set the initial control values, all except throttle
+        yaw = (YAWMAX + YAWMIN) / 2;                                                                //are set to the middle of their range.
+        pitch = (PITCHMAX + PITCHMIN) / 2;
+        roll = (ROLLMAX + ROLLMIN) / 2;
     }
 
     private class MyOnTouchListener implements View.OnTouchListener {
+        public float x, y;
         private float originalX;
         private float originalY;
         private float dX, dY;
@@ -64,61 +76,76 @@ public class FlightDeck extends MainActivity{
                 if (outOfBoundsRight && outOfBoundsUp) {                                             //Top Right
                     view.setX(originalX + DISTANCE);
                     view.setY(originalY - DISTANCE);
+                    sendControls();
                     return true;
                 } else if (outOfBoundsRight && outOfBoundsDown) {                                     //Bottom Right
                     view.setX(originalX + DISTANCE);
                     view.setY(originalY + DISTANCE);
+                    sendControls();
                     return true;
                 } else if (outOfBoundsLeft && outOfBoundsDown) {                                      //Bottom Left
                     view.setX(originalX - DISTANCE);
                     view.setY(originalY + DISTANCE);
+                    sendControls();
                     return true;
                 } else if (outOfBoundsLeft && outOfBoundsUp) {                                        //Top Left
                     view.setX(originalX - DISTANCE);
                     view.setY(originalY - DISTANCE);
+                    sendControls();
                     return true;
                 }
 
                 if (outOfBoundsRight) {
                     view.setX(originalX + DISTANCE);
                     view.setY(eventRawY + dY);
+                    sendControls();
                     return true;
                 }
 
                 if (outOfBoundsLeft) {
                     view.setX(originalX - DISTANCE);
                     view.setY(eventRawY + dY);
+                    sendControls();
                     return true;
                 }
 
                 if (outOfBoundsUp) {
                     view.setX(eventRawX + dX);
                     view.setY(originalY - DISTANCE);
+                    sendControls();
                     return true;
                 }
 
                 if (outOfBoundsDown) {
                     view.setX(eventRawX + dX);
                     view.setY(originalY + DISTANCE);
+                    sendControls();
                     return true;
                 }
 
                 view.setX(eventRawX + dX);
                 view.setY(eventRawY + dY);
 
+
             } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {                          //When the circle is released it is reset to it's original position
                 if (!throttle_yaw)
                     view.setY(originalY);                                                           //Else let it return to normal
                 view.setX(originalX);
+                sendControls();
             }
+            sendControls();
             return true;
         }
+    }
+
+    private void sendControls(){
+        super.connectedThread.write(flightControlsToByteArray());
     }
 
     private static byte [] flightControlsToByteArray()
     {
         byte temp;
-        byte[] toReturn = ByteBuffer.allocate(16).putFloat(throttle).putFloat(throttle).putFloat(throttle).putFloat(throttle).array();
+        byte[] toReturn = ByteBuffer.allocate(16).putFloat(throttle).putFloat(yaw).putFloat(pitch).putFloat(roll).array();
         //Swapping the bytes because the structs in python read in the opposite direction
 
         for(int i = 0; i <= 12; i+= 4){
@@ -132,6 +159,10 @@ public class FlightDeck extends MainActivity{
         }
 
         return toReturn;
+    }
+
+    private static float pointSlope(float x1, float x2, float y1, float y2){
+        return (y2 - y1) / (x2 - x1);
     }
 
     private void returnToMain() {
